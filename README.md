@@ -4,8 +4,10 @@ Homebridge Ambient Lights - Aurora
 This allows you to control the [Aurora Ambient LED Project](https://github.com/AndrewMohawk/Aurora) via Homekit.
 
 <p align="center">
-![Basic Controls](readme_assets/homebridge-aurora-basic-control.png)
-![Basic Button](readme_assets/homebridge-plugin-settings.png)
+
+![Basic Controls](./readme_assets/homebridge-aurora-basic-control.png)
+![Basic Button](./readme_assets/homebridge-plugin-settings.png)
+
 </p>
 
 ## Installation
