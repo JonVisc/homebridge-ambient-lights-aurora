@@ -1,16 +1,16 @@
 {
   "private": true,
-  "displayName": "Plugin Name",
-  "name": "homebridge-plugin-name",
+  "displayName": "Homebridge Ambient Lights Aurora",
+  "name": "homebridge-ambient-lights-aurora",
   "version": "1.0.0",
-  "description": "A short description about what your plugin does.",
+  "description": "Interfaces with a Raspberry Pi to allow a user to turn on and off the Aurora system.  This is based on this github project: https://github.com/AndrewMohawk/Aurora NOT Aurora switches.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/USERNAME/GITHUB_PROJECT_NAME.git"
+    "url": "git@github.com:JonVisc/homebridge-ambient-lights-aurora.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME/issues"
+    "url": "https://github.com/JonVisc/homebridge-ambient-lights-aurora/issues"
   },
   "engines": {
     "node": ">=10.17.0",
@@ -24,7 +24,10 @@
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "ambient-lights",
+    "aurora",
+    "Andrew Mohawk"
   ],
   "dependencies": {},
   "devDependencies": {
