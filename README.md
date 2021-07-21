@@ -1,12 +1,18 @@
 
 <p align="center">
 
-<img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-vertical.png" width="150">
+![Basic Controls](./readme_assets/homebridge-aurora-basic-control.png)
+![Basic Button](./readme_assets/homebridge-plugin-settings.png)
 
 </p>
 
 
-# Homebridge Platform Plugin Template
+# Homebridge Ambient Lights - Aurora
+
+This allows you to control the [Aurora Ambient LED Project](https://github.com/AndrewMohawk/Aurora) via Homekit.
+
+
+# Original README that I have to reference for a bit
 
 This is a template Homebridge platform plugin and can be used as a base to help you get started developing your own plugin.
 

@@ -2,7 +2,7 @@
   "private": true,
   "displayName": "Homebridge Ambient Lights Aurora",
   "name": "homebridge-ambient-lights-aurora",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Interfaces with a Raspberry Pi to allow a user to turn on and off the Aurora system.  This is based on this github project: https://github.com/AndrewMohawk/Aurora NOT Aurora switches.",
   "license": "Apache-2.0",
   "repository": {
@@ -29,7 +29,6 @@
     "aurora",
     "Andrew Mohawk"
   ],
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^14.14.31",
     "@typescript-eslint/eslint-plugin": "^4.16.1",

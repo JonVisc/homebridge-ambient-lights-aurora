@@ -5,11 +5,30 @@
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
+      "ipAddress": {
+        "title": "IP Address",
         "type": "string",
         "required": true,
-        "default": "HomeBridge - Ambient Lights Aurora Dynamic Platform"
+        "placeholder": "192.168.x.x"
+      },
+      "piName": {
+        "title": "Raspberry Pi Name",
+        "type": "string",
+        "required": true,
+        "default": "Raspberry Pi"
+      },
+      "extension": {
+        "title": "Default Extension",
+        "type": "string",
+        "default": "Aurora_Ambient_AutoCrop",
+        "oneOf": [
+          { "title": "Aurora Ambient Lighting ( AutoCrop )", "enum": ["Aurora_Ambient_AutoCrop"] },
+          { "title": "Aurora Ambient Lighting", "enum": ["Aurora_Ambient_NoCrop"] },
+          { "title": "Aurora Rainbow Display ( LED Only )", "enum": ["Aurora_Rainbow"] },
+          { "title": "Aurora Meteor Display ( LED Only )", "enum": ["Aurora_Meteor"] },
+          { "title": "Aurora Audio Spectrogram", "enum": ["Aurora_AudioSpectogram"] }
+        ],
+        "required": true
       }
     }
   }
