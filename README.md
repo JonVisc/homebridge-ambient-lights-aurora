@@ -4,8 +4,8 @@ Homebridge Ambient Lights - Aurora
 This allows you to control the [Aurora Ambient LED Project](https://github.com/AndrewMohawk/Aurora) via Homekit.
 
 <p align="center">
-![Basic Controls](./readme_assets/homebridge-aurora-basic-control.png)
-![Basic Button](./readme_assets/homebridge-plugin-settings.png)
+![Basic Controls](readme_assets/homebridge-aurora-basic-control.png)
+![Basic Button](readme_assets/homebridge-plugin-settings.png)
 </p>
 
 ## Installation
@@ -22,7 +22,6 @@ For the best experience setting up this plugin, please use [homebridge-config-ui
 ```json
 {
     "platforms": [
-        ...,
         {
             "platform": "HomeBridge - Ambient Lights Aurora",
             "auroras": [
@@ -33,8 +32,7 @@ For the best experience setting up this plugin, please use [homebridge-config-ui
                 }
             ]
         }
-    ],
-    ...
+    ]
 }
 ```
 
@@ -44,11 +42,11 @@ For the best experience setting up this plugin, please use [homebridge-config-ui
 There are currently 5 active extensions made by Andrew.  Since this plugin uses a Lightbulb service the Brightness switches between Extension modes.
 
 (I don't think this is totally logical, but I figure Audio is minimal brightness then worked by way up to the best modes)
-100-80 - Autocrop
-79-60  - No crop
-59-40  - Rainbow
-39-20  - Meteor
-19-0   - Audio Spectogram
+- 100-80 - Autocrop
+- 79-60  - No crop
+- 59-40  - Rainbow
+- 39-20  - Meteor
+- 19-0   - Audio Spectogram
 
 ## Issues
 
