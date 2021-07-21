@@ -24,6 +24,7 @@ export class AmbientLightAuroraPlatformAccessory {
 
     private auroraState = {
         On: false,
+        Brightness: 100,
     };
 
     constructor(
@@ -32,9 +33,13 @@ export class AmbientLightAuroraPlatformAccessory {
     ) {
 
         // set accessory information
-        this.accessory.getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, 'CANA Kit')
-            .setCharacteristic(this.platform.Characteristic.Model, 'Raspberry Pi 4');
+        // this.accessory.getService(this.platform.Service.AccessoryInformation)!
+        //     .setCharacteristic(this.platform.Characteristic.Manufacturer, 'CANA Kit')
+        //     .setCharacteristic(this.platform.Characteristic.Model, 'Raspberry Pi 4');
+
+        this.auroraService = this.accessory.getService(this.platform.Service.Lightbulb) ||
+            this.accessory.addService(this.platform.Service.Lightbulb);
+        this.auroraService.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.name);
 
         // // get the LightBulb service if it exists, otherwise create a new LightBulb service
         // // you can create multiple services for each accessory
@@ -96,79 +101,92 @@ export class AmbientLightAuroraPlatformAccessory {
         //   this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
         // }, 10000);
 
-        this.auroraService = this.accessory.getService(this.platform.Service.Lightbulb) ||
-        this.accessory.addService(this.platform.Service.Lightbulb);
-        this.auroraService.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.name);
+
+
+
         this.auroraService.getCharacteristic(this.platform.Characteristic.On)
             .onSet(this.setAuroraOn.bind(this))
             .onGet(this.getAuroraOn.bind(this));
 
+        this.auroraService.getCharacteristic(this.platform.Characteristic.Brightness)
+            .onSet(this.setAuroraBrightness.bind(this))
+            .onGet(this.getAuroraBrightness.bind(this));
+
+    }
+
+    async ensureServiceUp(): Promise<CharacteristicValue> {
+        return new Promise((accept, reject) => {
+            const req = http.get(`http://${this.accessory.context.device.ipAddress}`, (res) => {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+
+                res.on('end', () => {
+                    //this.platform.log.debug(JSON.parse(data));
+
+                    const isString = typeof data;
+                    if (isString) {
+                        //return true;
+                        accept(true);
+                        return;
+                    }
+                    reject(false);
+                    return false;
+                });
+
+            }).on('error', (err) => {
+                this.platform.log.error('Error: ', err.message);
+                reject(false);
+                return false;
+            });
+
+            //req.write(data);
+            //req.end();
+        });
     }
 
     async setAuroraOn(value: CharacteristicValue) {
         this.auroraState.On = value as boolean;
-        this.platform.log.info('Aurora State: ', this.auroraState.On.toString());
+        this.platform.log.info('Aurora On State: ', this.auroraState.On.toString());
 
-        const req = http.get(`http://${this.accessory.context.device.ip}`, (res) => {
-            let data = '';
-            res.on('data', (chunk) => {
-                data += chunk;
+        const isServiceEnabled = await this.ensureServiceUp();
+        if (isServiceEnabled) {
+            const data = JSON.stringify({
+                enabled: this.auroraState.On,
             });
 
-            res.on('end', () => {
-                //this.platform.log.debug(JSON.parse(data));
+            const updateConfigOptions = {
+                protocol: 'http:',
+                hostname: this.accessory.context.device.ipAddress,
+                port: 80,
+                path: '/update_config',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': data.length,
+                },
+            };
 
-                const isString = typeof data;
-                if (isString) {
-                    const data = JSON.stringify({
-                        enabled: this.auroraState.On,
-                    });
+            const req = http.request(updateConfigOptions, (res) => {
+                let data = '';
 
-                    const updateConfigOptions = {
-                        protocol: 'http:',
-                        hostname: this.accessory.context.device.ip,
-                        port: 80,
-                        path: '/update_config',
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Content-Length': data.length,
-                        },
-                    };
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
 
-                    const req = http.request(updateConfigOptions, (res) => {
-                        let data = '';
+                res.on('end', () => {
+                    this.platform.log.debug(JSON.parse(data));
+                    this.platform.log.debug('Set Aurora On =>', value);
+                });
 
-                        res.on('data', (chunk) => {
-                            data += chunk;
-                        });
-
-                        res.on('end', () => {
-                            this.platform.log.debug(JSON.parse(data));
-                            this.platform.log.debug('Set Aurrora On =>', value);
-                        });
-
-                    }).on('error', (err) => {
-                        this.platform.log.error('Error: ', err.message);
-                    });
-
-                    req.write(data);
-                    req.end();
-
-                    // if (this.auroraState.On) {
-
-                    // } else {
-
-                    // }
-                }
+            }).on('error', (err) => {
+                this.platform.log.error('Error: ', err.message);
             });
 
-        }).on('error', (err) => {
-            this.platform.log.debug('Error: ', err.message);
-        });
-
-        //req.write(data);
-        req.end();
+            req.write(data);
+            req.end();
+        }
     }
 
     async getAuroraOn(): Promise<CharacteristicValue> {
@@ -183,53 +201,70 @@ export class AmbientLightAuroraPlatformAccessory {
         return isOn;
     }
 
-    /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
-   */
-    // async setOn(value: CharacteristicValue) {
-    //   // implement your own code to turn your device on/off
-    //   this.exampleStates.On = value as boolean;
+    async setAuroraBrightness(value: CharacteristicValue) {
+        this.auroraState.Brightness = value as number;
+        this.platform.log.info('Aurora Brightness State: ', this.auroraState.Brightness.toString());
 
-    //   this.platform.log.debug('Set Characteristic On ->', value);
-    // }
+        const isServiceEnabled = await this.ensureServiceUp();
+        if (isServiceEnabled) {
+            const brightness = this.auroraState.Brightness;
+            let extension = 'Aurora_Ambient_AutoCrop';
+            if (brightness < 20) {
+                extension = 'Aurora_AudioSpectogram';
+            } else if (brightness < 40) {
+                extension = 'Aurora_Meteor';
+            } else if (brightness < 60) {
+                extension = 'Aurora_Rainbow';
+            } else if (brightness < 80) {
+                extension = 'Aurora_Ambient_NoCrop';
+            }
 
+            const data = JSON.stringify({
+                extension_name: extension,
+            });
 
+            const updateConfigOptions = {
+                protocol: 'http:',
+                hostname: this.accessory.context.device.ipAddress,
+                port: 80,
+                path: '/update_extension',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': data.length,
+                },
+            };
 
-    /**
-   * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possbile. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
+            const req = http.request(updateConfigOptions, (res) => {
+                let data = '';
 
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
-   */
-    // async getOn(): Promise<CharacteristicValue> {
-    //   // implement your own code to check if the device is on
-    //   const isOn = this.exampleStates.On;
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
 
-    //   this.platform.log.debug('Get Characteristic On ->', isOn);
+                res.on('end', () => {
+                    this.platform.log.debug(JSON.parse(data));
+                    this.platform.log.debug('Set Aurora Extension =>', extension);
+                });
 
-    //   // if you need to return an error to show the device as "Not Responding" in the Home app:
-    //   // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+            }).on('error', (err) => {
+                this.platform.log.error('Error: ', err.message);
+            });
 
-    //   return isOn;
-    // }
+            req.write(data);
+            req.end();
+        }
+    }
 
-    /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
-   */
-    // async setBrightness(value: CharacteristicValue) {
-    //   // implement your own code to set the brightness
-    //   this.exampleStates.Brightness = value as number;
+    async getAuroraBrightness(): Promise<CharacteristicValue> {
+        // implement your own code to check if the device is on
+        const brightness = this.auroraState.Brightness;
 
-    //   this.platform.log.debug('Set Characteristic Brightness -> ', value);
-    // }
+        this.platform.log.debug('Get Aurora Brightness ->', brightness);
 
+        // if you need to return an error to show the device as "Not Responding" in the Home app:
+        // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+
+        return brightness;
+    }
 }
